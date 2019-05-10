@@ -74,7 +74,6 @@
       }
       
       function setMarker (map, data, lat, lng) {
-        console.log(data);
         $.each(data, function(i,a) {
           var location = {lat: parseFloat(a.location.latitude), lng: parseFloat(a.location.longitude) }
           var marker = new google.maps.Marker({position: location, map: map});
