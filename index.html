@@ -24,7 +24,7 @@
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: -34.397, lng: 150.644},
-          zoom: 7
+          zoom: 11
         });
         infoWindow = new google.maps.InfoWindow;
         // Try HTML5 geolocation.
@@ -34,10 +34,27 @@
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
-            infoWindow.setPosition(pos);
-            infoWindow.setContent('Location found.');
-            infoWindow.open(map);
+              
+            map = new google.maps.Map(document.getElementById('map'), {
+                  center: pos,
+                  zoom: 11
+            });
+              
+              var marker = new google.maps.Marker({position: pos, map: map});
+              infoWindow.setContent('Your Location');
+              
+              marker.addListener('click', function() {
+                infowindow.open(map, marker);
+              });
+              
             map.setCenter(pos);
+              
+              $.get("https://data.cityofchicago.org/resource/gkur-vufi.json",
+              function(response) {
+                console.log("in data callback");
+                var data = response;
+                setMarker(map, data, pos.lat, pos.lng);
+            });
               
           }, function() {
             handleLocationError(true, infoWindow, map.getCenter());
@@ -54,6 +71,30 @@
                               'Error: The Geolocation service failed.' :
                               'Error: Your browser doesn\'t support geolocation.');
         infoWindow.open(map);
+      }
+      
+      function setMarker (map, data, lat, lng) {
+        console.log(data);
+        $.each(data, function(i,a) {
+          var location = {lat: parseFloat(a.location.latitude), lng: parseFloat(a.location.longitude) }
+          var marker = new google.maps.Marker({position: location, map: map});
+          var distance = calculateDist(lat, lng, a.location.latitude, a.location.longitude);
+          var infowindow = new google.maps.InfoWindow({
+            content: "District: " + a.district + " .Address: " + a.address + ". The Distance is: " +  distance + " Miles"
+          });
+          
+          marker.addListener('click', function() {
+            infowindow.open(map, marker);
+          });
+        });
+      }
+
+      function calculateDist(lat, lng, lata, lnga) {
+        var deglen = 68.71;
+        var x = lat - lata;
+        var y = (lng - lnga)*Math.cos(lata);
+        var num = deglen*Math.sqrt(x*x + y*y);
+        return num.toFixed(2).toString();
       }
     </script>
       
