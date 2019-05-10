@@ -51,7 +51,6 @@
               
               $.get("https://data.cityofchicago.org/resource/gkur-vufi.json",
               function(response) {
-                console.log("in data callback");
                 var data = response;
                 setMarker(map, data, pos.lat, pos.lng);
             });
